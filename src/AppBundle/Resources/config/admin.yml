@@ -1,0 +1,31 @@
+services:
+
+    app.admin.country:
+        class: AppBundle\Admin\App\CountryAdmin
+        tags:
+            - { name: sonata.admin, manager_type: orm, group: "Content", label: "Countries" }
+        arguments:
+            [ ~, AppBundle\Entity\App\Country,  ~ ]
+        calls:
+            - [ setTranslationDomain, [AppBundle]]
+
+    app.admin.city:
+        class: AppBundle\Admin\App\CityAdmin
+        tags:
+            - { name: sonata.admin, manager_type: orm, group: "Content", label: "Cities" }
+        arguments:
+            [ ~, AppBundle\Entity\App\City,  ~ ]
+        calls:
+            - [ setTranslationDomain, [AppBundle]]
+
+    app.admin.app.place:
+        class: AppBundle\Admin\App\PlaceAdmin
+        arguments: [~, AppBundle\Entity\App\Place, SonataAdminBundle:CRUD]
+        tags:
+            - {name: sonata.admin, manager_type: orm, group: admin, label: Place}
+
+    app.admin.app.category:
+        class: AppBundle\Admin\App\CategoryAdmin
+        arguments: [~, AppBundle\Entity\App\Category, SonataAdminBundle:CRUD]
+        tags:
+            - {name: sonata.admin, manager_type: orm, group: admin, label: Category}
