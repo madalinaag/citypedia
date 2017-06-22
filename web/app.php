@@ -1,5 +1,5 @@
 <?php
-die('asd');
+
 use Symfony\Component\ClassLoader\ApcClassLoader;
 use Symfony\Component\HttpFoundation\Request;
 
