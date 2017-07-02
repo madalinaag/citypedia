@@ -120,7 +120,7 @@ class PlaceController extends FOSRestController
      *      404="Returned when the specified id is not found",
      *  },
      * filters={
-     *     {"name"="id", "dataType"="array[sting]"},
+     *     {"name"="id", "dataType"="array[string]"},
      *  },
      *    )
      * @param Request $request
@@ -159,8 +159,8 @@ class PlaceController extends FOSRestController
         $recommPlace = $placeRepo->find($recommPlaceId);
 
         $response['id'] = $recommPlace->getId();
-        $response['name'] = $recommPlace->getName();
-        $response['image'] = $recommPlace->getImageUrl();
+        $response['place_name'] = $recommPlace->getName();
+        $response['imageUrl'] = $recommPlace->getImageUrl();
 
         $view = $this->view($response, Response::HTTP_OK);
 

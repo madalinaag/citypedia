@@ -1,3 +1,7 @@
+homepage:
+    path: /
+    defaults: { _controller: AppBundle:Default:index }
+
 sonata_user_security:
     resource: "@SonataUserBundle/Resources/config/routing/sonata_security_1.xml"
 
