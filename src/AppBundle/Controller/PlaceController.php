@@ -3,6 +3,9 @@
 namespace AppBundle\Controller;
 
 use AppBundle\AppBundle;
+use AppBundle\Entity\App\Keyword;
+use AppBundle\Entity\App\Place;
+use AppBundle\Repository\PlaceRepository;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use FOS\RestBundle\Controller\Annotations\RouteResource;
 use FOS\RestBundle\Controller\FOSRestController;
@@ -117,7 +120,7 @@ class PlaceController extends FOSRestController
      *      404="Returned when the specified id is not found",
      *  },
      * filters={
-     *     {"name"="gid", "dataType"="array[sting]", "description"="Displays the places matching the ids."},
+     *     {"name"="id", "dataType"="array[sting]"},
      *  },
      *    )
      * @param Request $request
@@ -125,15 +128,41 @@ class PlaceController extends FOSRestController
      */
     public function getRecommendationAction(Request $request) {
         $entityManager = $this->getDoctrine()->getManager();
-        $gIdString =  $request->query->get('gid');
-        $gId = explode(',', $gIdString);
+        $place_id =  $request->query->get('id');
 
-        /** @var AppBundle/Repository/PlaceRepository $placeRepo */
+        /** @var PlaceRepository $placeRepo */
         $placeRepo = $entityManager->getRepository('AppBundle:App\Place');
 
-        $places = $placeRepo->getRecommendations($gId);
+        /** @var Place $place */
+        $place = $placeRepo->find($place_id);
+        $category = $place->getCategory();
+        $keywords = $place->getKeywords();
 
-        $view = $this->view($places, Response::HTTP_OK);
+        $recommendations = $placeRepo->getRecommendations($place_id, $category, $keywords);
+
+        foreach ($keywords as $keyword) {
+            $key[] = $keyword->getName();
+        }
+
+        foreach ($recommendations as $recommendation) {
+            $data['id'] = $recommendation['id'];
+            $data['score'] = count(array_diff($key, $recommendation['keys']));
+            $recommendationsArray[] = $data;
+        }
+
+        usort($recommendationsArray, function($a, $b) {
+            return $a['score'] - $b['score'];
+        });
+
+        $recommPlaceId = $recommendationsArray[0]['id'];
+        /** @var Place $recommPlace */
+        $recommPlace = $placeRepo->find($recommPlaceId);
+
+        $response['id'] = $recommPlace->getId();
+        $response['name'] = $recommPlace->getName();
+        $response['image'] = $recommPlace->getImageUrl();
+
+        $view = $this->view($response, Response::HTTP_OK);
 
         return $view;
 

@@ -34,6 +34,7 @@ class PlaceRepository extends EntityRepository
         $results = $queryBuilder->getQuery()->getArrayResult();
         $keyRepo = $this->getEntityManager()->getRepository('AppBundle:App\Keyword');
 
+        $finalResult = [];
         foreach ($results as $result) {
             $keys = $keyRepo->getKeywordsForPlace($result['id']);
             $result['keys'] = $keys;
@@ -43,18 +44,30 @@ class PlaceRepository extends EntityRepository
         return $finalResult;
     }
 
-    public function getRecommendations($gId)
+    public function getRecommendations($place_id, $category, $keywords)
     {
         $queryBuilder = $this->createQueryBuilder('P');
 
-        $queryBuilder->select('P.id', 'P.name as place_name', 'P.description', 'C.name as category_name')
+        $queryBuilder->select('P.id', 'P.name')
             ->join('P.category', 'C')
-            ->where('P.gMapId in (:gId)')
-            ->setParameter('gId', $gId);
+            ->join('P.keywords', 'K')
+            ->where('C = :category')
+            ->andWhere('K IN (:keywords)')
+            ->andWhere('P.id != :id')
+            ->groupBy('P.id')
+            ->setParameters(array('category' => $category, 'keywords' => $keywords, 'id' => $place_id));
 
-        $result = $queryBuilder->getQuery()->getResult();
+        $results = $queryBuilder->getQuery()->getResult();
+        $keyRepo = $this->getEntityManager()->getRepository('AppBundle:App\Keyword');
 
-        return $result;
+        $finalResult = [];
+        foreach ($results as $result) {
+            $keys = $keyRepo->getKeywordsForPlace($result['id']);
+            $result['keys'] = $keys;
+            $finalResult[] = $result;
+        }
+
+        return $finalResult;
     }
 
 }
